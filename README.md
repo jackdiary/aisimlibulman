@@ -1,7 +1,6 @@
 # aisimlibulman
 # 🧠 AI 심리 전문 상담사 - RAG 기반 MBTI 맞춤형 챗봇
 
-[![Python](https://img.shields.io/badge//img.shields.ioio/badge/LangChain-0.3+-greenChatGPT를 뛰어넘는 전문적인 상담 AI**  
 > RAG 기술과 MBTI 성격 분석을 결합한 차세대 맞춤형 상담 시스템
 
 ## 🚀 프로젝트 소개

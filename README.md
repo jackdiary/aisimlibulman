@@ -150,34 +150,9 @@ streamlit run rag_psychology_chatbot.py
                         └──────────────────┘
 ```
 
-## 🤝 기여하기
 
-### 개발 참여 방법
-1. **Fork** 저장소
-2. **Feature branch** 생성 (`git checkout -b feature/amazing-feature`)
-3. **Commit** 변경사항 (`git commit -m 'Add amazing feature'`)
-4. **Push** to branch (`git push origin feature/amazing-feature`)
-5. **Pull Request** 생성
 
-### 기여 가능 영역
-- 새로운 심리학 모델 추가 (빅파이브, 애니어그램 등)
-- 다국어 지원 확장
-- 음성 인식/합성 기능
-- 모바일 앱 버전 개발
-- 성능 최적화
 
-## 📚 문서화
-
-### 상세 가이드
-- [설치 가이드](docs/installation.md)
-- [사용자 매뉴얼](docs/user-guide.md)
-- [개발자 가이드](docs/developer-guide.md)
-- [API 문서](docs/api-reference.md)
-
-### 예제 및 튜토리얼
-- [기본 상담 예제](examples/basic-counseling.md)
-- [RAG 커스터마이징](examples/rag-customization.md)
-- [성격 분석 확장](examples/personality-extension.md)
 
 ## 🔧 트러블슈팅
 
@@ -189,48 +164,17 @@ streamlit run rag_psychology_chatbot.py
 | OpenAI API 오류 | 키 설정 문제 | `.env` 파일 확인 |
 | 메모리 부족 | 대용량 문서 처리 | 청크 크기 조정 |
 
-## 📈 로드맵
 
-### v2.0 (2025 Q3)
-- [ ] **음성 감정 분석** 연동
-- [ ] **VR/AR 상담 환경** 지원
-- [ ] **다국어 지원** (영어, 일본어, 중국어)
-- [ ] **모바일 앱** 출시
 
-### v3.0 (2025 Q4)
-- [ ] **실시간 바이오 신호** 연동
-- [ ] **AI 아바타 상담사** 구현
-- [ ] **블록체인 기반 상담 기록** 보안
-- [ ] **전문가 네트워크** 연결
-
-## 👥 팀 소개
-
-### 개발팀
-- **AI 엔지니어**: RAG 시스템 설계 및 구현
-- **심리학 전문가**: MBTI 분석 로직 및 상담 기법 설계
-- **UX 디자이너**: 직관적 사용자 인터페이스 설계
-- **백엔드 개발자**: 성능 최적화 및 확장성 구현
-
-## 📄 라이센스
-
-이 프로젝트는 **MIT 라이센스** 하에 배포됩니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
-
-## 📞 연락처
 
 ### 프로젝트 관련 문의
-- **이메일**: ai.counselor.team@gmail.com
-- **이슈 리포팅**: [GitHub Issues](https://github.com/your-username/ai-psychology-counselor/issues)
-- **기능 요청**: [GitHub Discussions](https://github.com/your-username/ai-psychology-counselor/discussions)
+- **이메일**: 9radaaa@gmail.com
 
 ### 상업적 이용 문의
-- **파트너십**: partnership@ai-counselor.com
-- **라이센싱**: licensing@ai-counselor.com
+- **파트너십**: 9radaaa@gmail.com
+- **라이센싱**: 9radaaa@gmail.com
 
 
-
-**⭐ 이 프로젝트가 도움이 되셨다면 Star를 눌러주세요! ⭐**
-
-[🚀 데모 체험하기](https://ai-psychology-counselor.streamlit.app/) | [📚 문서 보기](https://docs.ai-counselor.com/) | [💬 커뮤니티 참여](https://discord.gg/ai-counselor)
 
 
 

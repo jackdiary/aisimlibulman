@@ -12,6 +12,61 @@ from langchain.chains import RetrievalQA, ConversationalRetrievalChain
 import pandas as pd
 import numpy as np
 
+import streamlit as st
+import os
+import base64
+
+import streamlit as st
+import base64
+import os
+
+audio_file_path = r"C:\Users\flux304\Downloads\relaxing-piano-310597.mp3"
+
+if os.path.exists(audio_file_path):
+    with open(audio_file_path, "rb") as f:
+        audio_bytes = f.read()
+        b64 = base64.b64encode(audio_bytes).decode()
+
+    # 버튼을 클릭했을 때 오디오가 재생되도록 합니다.
+    if st.button("🎵 배경 음악 재생"):
+        st.markdown(
+            f"""
+            <audio autoplay loop controls style="display: none;">
+                <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
+            </audio>
+            """,
+            unsafe_allow_html=True
+        )
+        st.info("🎵 배경 음악이 재생 중입니다.")
+
+else:
+    st.error(f"❌ 오디오 파일을 찾을 수 없습니다: {audio_file_path}")
+
+    import streamlit as st
+import base64
+
+# 간단한 배경 설정 함수
+def set_jpg_background(image_path="background.jpg"):
+    """JPG 파일을 50% 투명도로 배경 설정"""
+    
+    with open(image_path, "rb") as f:
+        img_str = base64.b64encode(f.read()).decode()
+    
+    st.markdown(f"""
+    <style>
+    .stApp {{
+        background: linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), 
+                   url(data:image/jpeg;base64,{img_str});
+        background-size: cover;
+        background-position: center;
+    }}
+    </style>
+    """, unsafe_allow_html=True)
+
+# 사용법
+set_jpg_background(r"C:\Users\flux304\Desktop\asd\ba.jpg")  # JPG 파일 경로 입력
+
+
 # 환경 변수 로드
 load_dotenv('eed.env')
 
@@ -21,10 +76,13 @@ if not api_key:
     st.error("❌ OPENAI_API_KEY를 찾을 수 없습니다. eed.env 파일을 확인해주세요.")
     st.stop()
 
+# 벡터 스토어 저장 경로 정의
+FAISS_INDEX_DIR = "faiss_index"
+
 # 페이지 설정
 st.set_page_config(
-    page_title="AI 심리 전문 상담사 - RAG 기반",
-    page_icon="🧠",
+    page_title="심리와 MBTI 전문 AI 상담사 - RAG 기반",
+    page_icon="",
     layout="wide"
 )
 
@@ -86,7 +144,7 @@ MBTI 심리학 전문 지식베이스:
 
 INTJ (건축가) 유형 특성:
 - 독립적이고 창조적인 사고를 가진 완벽주의자
-- 장기적 계획과 전략적 사고에 뛰어남  
+- 장기적 계획과 전략적 사고에 뛰어남  
 - 스트레스 상황에서는 혼자만의 시간이 필요
 - 불만 해결 시 논리적 근거와 체계적 접근을 선호
 - 감정보다는 사실과 데이터에 기반한 해결책 요구
@@ -98,7 +156,7 @@ ENFP (활동가) 유형 특성:
 - 불만 상황에서도 긍정적 해결책을 모색
 - 개인적 가치관이 존중받기를 원함
 
-ISTJ (논리주의자) 유형 특성:  
+ISTJ (논리주의자) 유형 특성:  
 - 체계적이고 신뢰할 수 있는 성격
 - 기존 규칙과 절차를 중요시함
 - 안정성과 예측 가능성을 선호
@@ -107,7 +165,7 @@ ISTJ (논리주의자) 유형 특성:
 
 ESFJ (집정관) 유형 특성:
 - 타인을 돕고 조화를 이루려는 성향이 강함
-- 감정적 지지와 격려를 중요시함  
+- 감정적 지지와 격려를 중요시함  
 - 구체적이고 실용적인 도움을 선호
 - 개인적 관심과 배려를 통한 해결 방식 선호
 - 공동체와 관계 중심의 접근을 원함
@@ -166,33 +224,45 @@ INFJ (옹호자) 유형 특성:
 """
 
 # 벡터 스토어 초기화 함수
-@st.cache_resource
 def initialize_vector_store():
-    """심리학 전문 지식을 벡터 데이터베이스로 구축"""
+    """심리학 전문 지식을 벡터 데이터베이스로 구축하거나 불러오기"""
     try:
-        # 텍스트 분할기 설정
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=500,
-            chunk_overlap=50,
-            separators=["\n\n", "\n", ":", "-", " "]
-        )
-        
-        # 텍스트를 청크로 분할
-        chunks = text_splitter.split_text(PSYCHOLOGY_KNOWLEDGE)
-        
-        # OpenAI 임베딩 모델 초기화
-        embeddings = OpenAIEmbeddings(model="text-embedding-ada-002")
-        
-        # FAISS 벡터 스토어 생성
-        vector_store = FAISS.from_texts(
-            texts=chunks,
-            embedding=embeddings,
-            metadatas=[{"source": f"psychology_kb_chunk_{i}"} for i in range(len(chunks))]
-        )
-        
-        return vector_store
+        # 벡터 스토어 디렉토리가 있는지 확인
+        if os.path.exists(FAISS_INDEX_DIR):
+            st.info("✅ 기존 벡터 스토어를 불러오는 중...")
+            embeddings = OpenAIEmbeddings(model="text-embedding-ada-002")
+            vector_store = FAISS.load_local(FAISS_INDEX_DIR, embeddings, allow_dangerous_deserialization=True)
+            st.success("🎉 벡터 스토어가 성공적으로 로드되었습니다!")
+            return vector_store
+        else:
+            st.info("🔄 새 벡터 스토어를 생성 중입니다...")
+            # 텍스트 분할기 설정
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=500,
+                chunk_overlap=50,
+                separators=["\n\n", "\n", ":", "-", " "]
+            )
+            
+            # 텍스트를 청크로 분할
+            chunks = text_splitter.split_text(PSYCHOLOGY_KNOWLEDGE)
+            
+            # OpenAI 임베딩 모델 초기화
+            embeddings = OpenAIEmbeddings(model="text-embedding-ada-002")
+            
+            # FAISS 벡터 스토어 생성
+            vector_store = FAISS.from_texts(
+                texts=chunks,
+                embedding=embeddings,
+                metadatas=[{"source": f"psychology_kb_chunk_{i}"} for i in range(len(chunks))]
+            )
+            
+            # 벡터 스토어 저장
+            vector_store.save_local(FAISS_INDEX_DIR)
+            st.success("🎉 새 벡터 스토어가 생성 및 저장되었습니다!")
+            return vector_store
+            
     except Exception as e:
-        st.error(f"벡터 스토어 초기화 실패: {str(e)}")
+        st.error(f"벡터 스토어 초기화/로딩 실패: {str(e)}")
         return None
 
 # 성격 분석 함수 (RAG 기반으로 강화)
@@ -324,6 +394,9 @@ def update_vector_store_with_file(uploaded_file, vector_store):
         # 벡터 스토어 병합
         vector_store.merge_from(new_vectors)
         
+        # 변경 사항을 파일에 저장
+        vector_store.save_local(FAISS_INDEX_DIR)
+        
         return True, f"{uploaded_file.name} 파일이 성공적으로 추가되었습니다."
         
     except Exception as e:
@@ -331,25 +404,25 @@ def update_vector_store_with_file(uploaded_file, vector_store):
 
 # 메인 UI 함수
 def main():
-    st.title("🧠 AI 심리 전문 상담사 (RAG 기반)")
+    st.title(" 심리와 MBTI 전문 AI 상담사 (RAG 기반)")
     st.markdown("### 전문 심리학 지식을 바탕으로 한 맞춤형 상담 서비스")
     st.markdown("---")
     
-    # 벡터 스토어 초기화
+    # 벡터 스토어 초기화 (하드에서 불러오거나 새로 생성)
     if "vector_store" not in st.session_state:
         with st.spinner("전문 심리학 지식베이스를 로딩중입니다..."):
             st.session_state.vector_store = initialize_vector_store()
     
     # 사이드바 설정
     with st.sidebar:
-        st.header("🎯 상담 설정")
+        st.header(" 상담 스타일 설정")
         
         # 파일 업로드 기능
-        st.subheader("📄 전문 자료 추가")
+        st.subheader("📄 자료 추가")
         uploaded_file = st.file_uploader(
-            "심리학 관련 문서를 업로드하세요 (PDF, TXT)",
+            "심리학 또는 상담스타일 관련 문서를 업로드하세요 (PDF, TXT)",
             type=['pdf', 'txt'],
-            help="업로드한 문서는 상담에 활용됩니다"
+            help="업로드한 자료는 상담에 활용됩니다"
         )
         
         if uploaded_file and st.button("📤 문서 추가"):
@@ -451,7 +524,7 @@ def main():
                     response = chain.invoke({"input": user_input})
                 
                 # 전문성 표시와 함께 응답
-                full_response = f"{response}\n\n---\n*🧠 **{detected_type} 유형 맞춤 상담** | 📚 전문 심리학 지식 기반 | 🎯 {counseling_mode} 모드*"
+                full_response = f"{response}\n\n---\n* **{detected_type} 유형 맞춤 상담** | 📚 전문 심리학 지식 기반 | 🎯 {counseling_mode} 모드*"
                 
                 st.markdown(full_response)
                 
@@ -481,7 +554,7 @@ def main():
             
             **📚 지식 데이터베이스:**
             - MBTI 8가지 유형 특성 분석
-            - 심리 상담 전문 기법  
+            - 심리 상담 전문 기법  
             - 스트레스 대처 방법론
             - 불만 처리 심리학 이론
             """)
@@ -493,7 +566,7 @@ def main():
             - INTJ: 논리적 체계적 접근
             - ENTP: 혁신적 유연한 사고
             
-            **🎭 외교관형 (NF)**  
+            **🎭 외교관형 (NF)**  
             - ENFP: 창의적 열정적 지지
             - INFJ: 깊이있는 통찰적 조언
             
